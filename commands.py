@@ -25,6 +25,7 @@ def info(words):
         for direction, room_id in currentRoom["path"].items():
             # THIS MAY BE A POSSIBLE ERROR
             print("-" + direction.capitalize() + ": " + rooms.rooms[room_id]["name"])
+        return
 
     return print("ERROR: target entity does not exist!")
 
