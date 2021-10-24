@@ -1,5 +1,5 @@
 # gamestate.py
-# Variables about the game.
+# Variables about the current player circumstances (such as whether fighting or exploring, what room they're in, whether they've died or not, etc.).
 import creatures
 import rooms
 

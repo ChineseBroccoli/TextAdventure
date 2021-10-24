@@ -34,7 +34,13 @@ def game_loop():
         command = input("type command: ")
         print(divider)
         #splits up the input into a list
-        words = command.lower().split()       
+        words = command.lower().split()
+        #if there is no command
+        if len(words) == 0:
+            print("ERROR: No command given!")
+            print(divider)
+            # if you don't have a continue then the whole thing breaks when you get to 'if words[0]...' because words[0] doesn't exist
+            continue
         # if the command exists
         if words[0] in commands.command_list:
             # execute command(words), words being the whole list.
@@ -42,6 +48,7 @@ def game_loop():
         else:
             print("ERROR: Invalid Command!")
 
+        # you take damage every time you type a command.
         if (gamestate.current_action == "fighting"):
             print(divider)
             for enemy in gamestate.get_current_room()["enemies"]:
@@ -56,6 +63,7 @@ def game_loop():
 
 start_game()       
 
+# if you die, prompts whether you would like to start again or not.
 while (gamestate.game_over == True):
     play_again = input("Do you want to play again? (y/n): ")
     if (play_again.lower() in ["y", "yes", "ye", "yeah"]):

@@ -33,6 +33,7 @@ def look(words):
             print("-" + item["name"])
     return
 
+# used by 'info' to save space. prints all information about an item.
 def print_item_info(index, item):
     print(item["name"] + " (" + str(index) + "/" + str(gamestate.player["invspace"]) + "): ")
     print("-Description: " + str(item["desc"]))
@@ -67,23 +68,31 @@ def info(words):
                 print("-" + item["name"])
         return
     
+    # shows information about enemies.
     if words[1] == "enemies":
-        print("INFO (ENEMIES)")
-        for enemy in gamestate.get_current_room()["enemies"]:
-            print(enemy["name"] + ":")
-            print("-Description: " + str(enemy["desc"]))
-            print("-Health: " + str(enemy["hp"]) + "/" + str(enemy["maxhp"]))
-            print("-Attack: " + str(enemy["atk"]))
-        return
+        if not (len(gamestate.get_current_room()["enemies"]) == 0):
+            print("INFO (ENEMIES)")
+            for enemy in gamestate.get_current_room()["enemies"]:
+                print(enemy["name"] + ":")
+                print("-Description: " + str(enemy["desc"]))
+                print("-Health: " + str(enemy["hp"]) + "/" + str(enemy["maxhp"]))
+                print("-Attack: " + str(enemy["atk"]))
+            return
+        else:
+            return print ("There are no enemies to show information for!")
 
+    # Shows indepth info about inventory.
     if words[1] == "inventory":   
+        # if inventory empty
         if len(gamestate.player["inv"]) == 0:
             return print("Your inventory is empty! You poor person!")
+        # prints info about inventory (for 'info inventory')
         if len(words) == 2:
             print("INFO (INVENTORY)")
             for index, item in enumerate(gamestate.player["inv"]):
                 print_item_info(index, item)
             return
+        # prints info about item in inventory (for 'info inventory stick')
         if len(words) == 3:
             for index, item in enumerate(gamestate.player["inv"]):
                 if (words[2] == item["name"].lower()):
@@ -91,6 +100,7 @@ def info(words):
                     return print_item_info(index, item)
             return print("No item with that name in your inventory!")
     
+    # shows info about item equipped.
     if words[1] == "equipped":
         if gamestate.player["equipped"] == None:
             return print("You do not have an item equipped!")
@@ -184,44 +194,60 @@ def attack(words):
     for enemy in gamestate.get_current_room()["enemies"]:
         # if argument matches an enemy
         if words[1] == enemy["name"].lower():
-            damamge = gamestate.player["atk"]
+            # gives damage equal to player's base attack.
+            damage = gamestate.player["atk"]
+            # adds weapon damage if it is equipped
             if (not gamestate.player["equipped"] is None):
-                damamge += gamestate.player["equipped"]["atk"]
-            print("Player deals: " + str(damamge) + " to " + enemy["name"] + "!")
-            enemy["hp"] -= gamestate.player["atk"]
+                damage += gamestate.player["equipped"]["atk"]
+            # gives damage.
+            print("Player deals: " + str(damage) + " to " + enemy["name"] + "!")
+            enemy["hp"] -= damage
             if enemy["hp"] <= 0:
                 gamestate.get_current_room()["enemies"].remove(enemy)
                 print(divider)
                 print(enemy["name"] + " dies!")
             break
     
+    # if no enemies, shows text to player telling them that they've cleared everything.
     if (len(gamestate.get_current_room()["enemies"]) == 0):
         del gamestate.get_current_room()["enemies"]
         gamestate.current_action = "exploring"
         print(divider)
-        print("You cleared all the enemies!")
+        print("You defeated all the enemies!")
 
+#regains hp
 def rest(words):
+    #only works in 'rest' rooms
     if "rest" in gamestate.get_current_room():
         gamestate.player["hp"] = gamestate.player["maxhp"]
         return print("Player rests and heals wounds")
     else:
-        return print("ERROR: You can't rest you lazy bum!")
+        return print("ERROR: You can't rest you lazy bum! (Find a room you can rest in!)")
 
+#pickup item from room
 def pickup(words):
+    #if no argument
     if len(words) == 1:
         return print("ERROR: No item targeted!")
+    # if no items in room
     if not "items" in gamestate.get_current_room():
         return print("ERROR: No items to pick up!")
     
+    # loops through all items in rooms
     for item in gamestate.get_current_room()["items"]:
+        # if it matches
         if words[1] == item["name"].lower():
+            # checks inventory space; if inventory space is reached, doesn't work.
             if len(gamestate.player["inv"]) == gamestate.player["invspace"]:
                 return print("ERROR: Not enough inventory space!")
+            # adds item if everything else clears.
             else:
+                # adds to inventory list
                 gamestate.player["inv"].append(item)
+                # removes from the room
                 gamestate.get_current_room()["items"].remove(item)
                 print("Player picks up: " + item["name"])
+                # if no items in room, shows that there are none left.
                 if (len(gamestate.get_current_room()["items"]) == 0):
                     del gamestate.get_current_room()["items"]
                     print(divider)
@@ -230,21 +256,41 @@ def pickup(words):
 
     return print("No item with that name to pickup!")
 
+# equips the weapon from inventory
 def equip(words):
+    # if there ain't no argument
     if len(words) == 1:
         return print("ERROR: No item targeted!")
+    # if there ain't nothing in inventory to equip
     if len(gamestate.player["inv"]) == 0:
-        return print("ERROR: No item to equip! Inventory is full!")
+        return print("ERROR: No item to equip! Inventory is empty!")
 
+    #loops through each item
     for item in gamestate.player["inv"]:
+        # if item is found
         if words[1] == item["name"].lower():
             if not "equipable" in item:
                 return print("ERROR: This item is not equipable!")
             else:
+                # equips the item.
                 gamestate.player["equipped"] = item
                 return print("Player equiped: " + item["name"])
+    
+    return print("ERROR: Item does not exist.")
 
-
+# I tried automating it but it didn't work. Just update it if you update command_list please :)
+def help(words):
+    print("COMMANDS:")
+    print("Info: Prints info about stuff. Aliases: look")
+    print("Move: Moves in a direction. Aliases: go, walk, climb")
+    print("Clear: Clears screen (only works in console). Aliases: cls")
+    print("Exit: Quits game. Aliases: quit")
+    print("Say: Say something. Aliases: speak")
+    print("Attack: Attack something. Aliases: fight")
+    print("Rest: Rest for a while. Aliases: sleep")
+    print("Pickup: Pick an item up. Aliases: take")
+    print("Equip: Equip a weapon from inventory. Aliases: puton")
+    return
 
 # list of every command; this is how integration with main.py occurs.
 command_list = {
@@ -255,9 +301,19 @@ command_list = {
     "quit": exit,
     "exit": exit,
     "say": say,
-    "look": look,
+    # might seem contradictory but its so you can 'look item' or whatever.
+    "look": info,
     "attack": attack,
     "rest": rest,
     "pickup": pickup,
-    "equip": equip
+    "equip": equip,
+    "help": help,
+    "go": move,
+    "take": pickup,
+    "walk": move,
+    "climb": move,
+    "speak": say,
+    "fight": attack,
+    "sleep": rest,
+    "puton": equip,
 }

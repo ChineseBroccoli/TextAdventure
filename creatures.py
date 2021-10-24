@@ -1,3 +1,5 @@
+# creatures.py
+# list of every single creature in the game, plus properties
 player = {
     "name": "Player",
     "hp": 100,

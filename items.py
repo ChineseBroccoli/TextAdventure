@@ -1,3 +1,5 @@
+# items.py
+# list of every single item in game, plus properties
 stick = {
     "name": "Stick",
     "desc": "The remains of an old tree",
