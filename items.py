@@ -22,7 +22,7 @@ bow = {
 debroglie_wavelength = {
     "name": "Debroglie_Wavelength",
     "desc": "The Debroglie Wavelength",
-    "atk": 10,
+    "atk": 15,
     "equipable": True
 }
 
